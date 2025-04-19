@@ -1,0 +1,64 @@
+.game-controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 25px 0;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    min-width: 140px;
+}
+
+.btn.primary {
+    background-color: var(--yellow);
+    color: #212529;
+}
+
+.btn.primary:hover {
+    background-color: var(--primary-dark);
+}
+
+.btn.secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn.secondary:hover {
+    background-color: #5c636a;
+}
+
+.btn.reset-scores {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn.reset-scores:hover {
+    background-color: #c82333;
+}
+
+.btn.hint-btn {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.btn.hint-btn:hover {
+    background-color: #138496;
+}
+
+@media (max-width: 480px) {
+    .game-controls {
+        gap: 10px;
+    }
+    
+    .btn {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+        min-width: 120px;
+    }
+}

@@ -1,0 +1,27 @@
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 10px;
+    max-width: 400px;
+    margin: 0 auto;
+    animation: fadeIn 0.8s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 480px) {
+    .grid {
+        grid-gap: 5px;
+        max-width: 300px;
+    }
+}
+
+@media (max-width: 320px) {
+    .grid {
+        grid-gap: 3px;
+        max-width: 250px;
+    }
+}

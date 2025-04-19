@@ -1,14 +1,209 @@
 import './App.css'
-import DogCard  from './DogCard';
+import Grid from './components/Grid/Grid'
+import { useState, useEffect, useRef } from 'react'
+import ScoreBoard from './components/ScoreBoard/ScoreBoard'
+import GameControls from './components/GameControls/GameControls'
+import GameHistory from './components/GameHistory/GameHistory'
+import Confetti from './components/Confetti/Confetti'
+import GameModeSelector from './components/GameModeSelector/GameModeSelector'
 
 function App() {
+  const [gameState, setGameState] = useState({
+    isXTurn: true,
+    gameOver: false,
+    winner: null
+  });
+
+  const [scores, setScores] = useState({
+    x: 0,
+    o: 0,
+    draw: 0
+  });
+
+  const [history, setHistory] = useState([]);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [theme, setTheme] = useState('light');
+  const [vsComputer, setVsComputer] = useState(false);
+  const [aiDifficulty, setAiDifficulty] = useState('medium'); // easy, medium, hard
+
+  // Add a ref to track the previous difficulty
+  const prevDifficultyRef = useRef(aiDifficulty);
+
+  // Use a notification message state
+  const [notification, setNotification] = useState(null);
+
+  // Add a ref to track if we need to force reset the board
+  const forceResetRef = useRef(false);
+
+  // Update scores when game ends - add better messaging for computer wins/losses
+  useEffect(() => {
+    if (gameState.gameOver) {
+      if (gameState.winner) {
+        setScores(prev => ({
+          ...prev,
+          [gameState.winner]: prev[gameState.winner] + 1
+        }));
+        
+        const winMessage = gameState.winner === 'x' 
+          ? (vsComputer ? "You won!" : "Player X won!")
+          : (vsComputer ? "Computer won!" : "Player O won!");
+          
+        setHistory(prev => [...prev, winMessage]);
+        
+        // Only show confetti when player wins against computer, or for any win in 2-player mode
+        if (gameState.winner === 'x' || !vsComputer) {
+          setShowConfetti(true);
+        }
+      } else {
+        setScores(prev => ({ ...prev, draw: prev.draw + 1 }));
+        setHistory(prev => [...prev, "Game ended in a draw"]);
+      }
+    }
+  }, [gameState.gameOver, gameState.winner, vsComputer]);
+
+  // Hide confetti after 3 seconds
+  useEffect(() => {
+    if (showConfetti) {
+      const timer = setTimeout(() => setShowConfetti(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showConfetti]);
+
+  // Function to properly reset the game with all necessary state
+  const resetGame = () => {
+    setGameState({
+      isXTurn: true, // Always start with player X
+      gameOver: false,
+      winner: null
+    });
+    setShowConfetti(false);
+    
+    // Set this flag to tell Grid component to reset completely
+    forceResetRef.current = true;
+    // Allow a brief delay before clearing the flag
+    setTimeout(() => {
+      forceResetRef.current = false;
+    }, 50);
+  };
+
+  const resetScores = () => {
+    setScores({ x: 0, o: 0, draw: 0 });
+    setHistory([]);
+  };
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+    document.body.className = theme === 'light' ? 'dark-theme' : '';
+  };
+
+  const handleGameModeChange = (isVsComputer) => {
+    setVsComputer(isVsComputer);
+    resetGame();
+    setNotification(isVsComputer ? "Switched to VS Computer mode" : "Switched to 2 Players mode");
+    
+    // Clear notification after 2 seconds
+    setTimeout(() => setNotification(null), 2000);
+  };
+
+  const handleDifficultyChange = (difficulty) => {
+    if (difficulty === aiDifficulty) return; // No change needed
+    
+    setAiDifficulty(difficulty);
+    resetGame();
+    
+    // Show notification
+    setNotification(`Difficulty changed to ${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}`);
+    
+    // Clear notification after 2 seconds
+    setTimeout(() => setNotification(null), 2000);
+  };
+
+  // Display text for current player with custom text for computer's turn
+  const getCurrentPlayerText = () => {
+    if (gameState.isXTurn) {
+      return vsComputer ? 'Your turn (X)' : 'Player X';
+    } else {
+      return vsComputer ? 'Computer is thinking...' : 'Player O';
+    }
+  };
+
   return (
-    <>
-      <DogCard name="tiger" image="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSbBoffenNodKZ-t4ahRyHByGvLJ0t8ydgxVA&s"/>
-      <DogCard name="this is dog" image="data:image/jpeg;base64,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"/>
+    <div className={`app-container ${theme}-theme`}>
+      {showConfetti && <Confetti />}
+
+      <header className="game-header">
+        <h1>Tic Tac Toe</h1>
+        <button onClick={toggleTheme} className="theme-toggle">
+          {theme === 'light' ? '🌙' : '☀️'}
+        </button>
+      </header>
+
+      <GameModeSelector 
+        vsComputer={vsComputer} 
+        onModeChange={handleGameModeChange} 
+        difficulty={aiDifficulty}
+        onDifficultyChange={handleDifficultyChange}
+      />
+
+      {vsComputer && (
+        <div className="game-mode-info">
+          You are playing as X against the Computer (O) - {aiDifficulty.charAt(0).toUpperCase() + aiDifficulty.slice(1)} difficulty
+        </div>
+      )}
       
-      
-    </>
+      {notification && (
+        <div className="notification-message">
+          {notification}
+        </div>
+      )}
+
+      <ScoreBoard 
+        scores={scores} 
+        vsComputer={vsComputer}
+      />
+
+      {gameState.gameOver && (
+        <div className={`game-over ${gameState.winner ? 'winner' : 'draw'}`}>
+          <h2>
+            {gameState.winner 
+              ? `${gameState.winner.toUpperCase() === 'X' 
+                  ? (vsComputer ? 'You' : 'Player X') 
+                  : (vsComputer ? 'Computer' : 'Player O')} Won!` 
+              : "It's a Draw!"}
+          </h2>
+        </div>
+      )}
+
+      {!gameState.gameOver && (
+        <div className="game-info">
+          <h2>
+            Current Player: <span className={gameState.isXTurn ? 'player-x' : 'player-o'}>
+              {getCurrentPlayerText()}
+            </span>
+          </h2>
+        </div>
+      )}
+
+      <Grid 
+        numberOfCards={9} 
+        isXTurn={gameState.isXTurn} 
+        gameOver={gameState.gameOver}
+        setGameState={setGameState}
+        winner={gameState.winner}
+        vsComputer={vsComputer}
+        aiDifficulty={aiDifficulty}
+        forceReset={forceResetRef.current}
+      />
+
+      <GameControls 
+        resetGame={resetGame} 
+        resetScores={resetScores} 
+        gameOver={gameState.gameOver}
+        vsComputer={vsComputer}
+      />
+
+      <GameHistory history={history} />
+    </div>
   )
 }
 

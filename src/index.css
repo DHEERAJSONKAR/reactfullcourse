@@ -1,0 +1,45 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --primary: #ffc107;
+  --primary-dark: #e0a800;
+  --secondary: #6c757d;
+  --background: #f8f9fa;
+  --text: #212529;
+  --winner-bg: #28a745;
+  --draw-bg: #17a2b8;
+  font-family: 'Poppins', sans-serif;
+  color: var(--text);
+}
+
+body {
+  background-color: var(--background);
+  min-height: 100vh;
+  padding: 20px;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+button:hover {
+  transform: translateY(-2px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 10px;
+  }
+}
